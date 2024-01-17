@@ -97,4 +97,10 @@ def compute_portfolio_returns_over_time(portfolio_oder_df: pd.DataFrame, book_cu
 
 
 def compute_backtest_metrics(returns_time_series: pd.Series) -> Tuple:
-    pass
+    sharpe = np.sqrt(252) * returns_time_series.mean() / returns_time_series.std()
+    vol = np.sqrt(252) * returns_time_series.std()
+
+    cum_returns = (1 + returns_time_series).cumprod()
+    peak = cum_returns.expanding(min_periods=1).max()
+    drawdown = (cum_returns - peak) / peak
+    return sharpe, vol, drawdown.min()

@@ -213,7 +213,7 @@ def build_portfolio_summary(
 ):
     portfolio_summary_records = []
     for key, portfolio_df in portfolios.items():
-        open_date = order_df.loc[order_df[OrderColumns.date.value] == key, OrderColumns.date.value].min()
+        open_date = order_df.loc[order_df[OrderColumns.portfolio.value] == key, OrderColumns.date.value].min()
         book_currency = book_currencies.get(key, master_currency)
 
         deposits = (portfolio_df[PortfolioColumns.unit_cost.value] * portfolio_df[PortfolioColumns.qty.value]).sum()
@@ -224,7 +224,7 @@ def build_portfolio_summary(
         returns_ts = compute_portfolio_returns_over_time(
             order_df.loc[order_df[OrderColumns.portfolio.value] == key, :], book_currency
         )
-        vol, max_dd, sharpe = compute_backtest_metrics(returns_ts)
+        sharpe, vol, max_dd = compute_backtest_metrics(returns_ts)
 
         value_book_currency = portfolio_df[PortfolioColumns.value_book_currency.value].sum()
 
@@ -263,6 +263,7 @@ def main():
     wb = xw.Book.caller()
     mvt_sheet = wb.sheets["Mouvements"]
     order_sheet = wb.sheets["Ordres"]
+    summary_sheet = wb.sheets["Investissement"]
 
     master_currency = "EUR"
     book_currencies = {"BARC": "GBP"}
@@ -289,8 +290,9 @@ def main():
     cash_accounts_summary = build_cash_accounts_summary(
         mvt_data, order_data, portfolios, book_currencies, master_currency
     )
+    save_dataframe(cash_accounts_summary, "B2", summary_sheet, index=False)
     portfolio_summary = build_portfolio_summary(order_data, portfolios, book_currencies, master_currency)
-
+    save_dataframe(portfolio_summary, "B10", summary_sheet, index=False)
     print("done")
 
 

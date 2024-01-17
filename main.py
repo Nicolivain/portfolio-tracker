@@ -12,16 +12,22 @@ from constant import (
     PortfolioColumns,
     YFinanceColumns,
     CashAccountSummary,
+    PortfolioSummary,
     Side,
     SIDE_TO_IBUY,
     PORTFOLIO_DISPLAY_ORDER,
 )
-from portfolio_utils import compute_position_value_and_dividend_over_time, compute_sharpe_ratio
+from portfolio_utils import (
+    compute_sharpe_ratio,
+    compute_position_value_and_dividend_over_time,
+    compute_portfolio_returns_over_time,
+    compute_backtest_metrics,
+)
 from utils import (
     positive_weighted_average,
     get_historical_prices_with_dates,
     get_company_info,
-    get_forex_rates,
+    get_today_forex_rates,
     read_table,
     save_dataframe,
 )
@@ -91,9 +97,9 @@ def build_portfolio_analytics(portfolio_df: pd.DataFrame, book_currency: str) ->
                 today_price_local_ccy /= 100
                 portfolio_df.loc[idx, PortfolioColumns.dividends.value] /= 100
             elif local_ccy == "GBp":
-                fx_rate = get_forex_rates("GBP", book_currency) / 100
+                fx_rate = get_today_forex_rates("GBP", book_currency) / 100
             else:
-                fx_rate = get_forex_rates(local_ccy, book_currency)
+                fx_rate = get_today_forex_rates(local_ccy, book_currency)
         historical_data[[YFinanceColumns.price.value, YFinanceColumns.dividends.value]] *= fx_rate
 
         # Adding the metrics to the DataFrame
@@ -155,8 +161,9 @@ def build_cash_accounts_summary(
 
         fx_rate = 1
         if local_currency != master_currency:
-            fx_rate = get_forex_rates(local_currency, master_currency)
+            fx_rate = get_today_forex_rates(local_currency, master_currency)
 
+        open_date = mvt_df.loc[mvt_df[MovementColumns.account.value] == key, MovementColumns.date.value].min()
         balance = mvt_df.loc[mvt_df[MovementColumns.account.value] == key, MovementColumns.qty.value].sum()
         interest = mvt_df.loc[
             (mvt_df[MovementColumns.account.value] == key)
@@ -175,6 +182,7 @@ def build_cash_accounts_summary(
         ].sum()
 
         row = {
+            CashAccountSummary.open_date.value: open_date,
             CashAccountSummary.account.value: key,
             CashAccountSummary.balance.value: balance,
             CashAccountSummary.interest.value: interest,
@@ -203,7 +211,52 @@ def build_portfolio_summary(
     book_currencies: Dict[str, str],
     master_currency="EUR",
 ):
-    pass
+    portfolio_summary_records = []
+    for key, portfolio_df in portfolios.items():
+        open_date = order_df.loc[order_df[OrderColumns.date.value] == key, OrderColumns.date.value].min()
+        book_currency = book_currencies.get(key, master_currency)
+
+        deposits = (portfolio_df[PortfolioColumns.unit_cost.value] * portfolio_df[PortfolioColumns.qty.value]).sum()
+        taxes = portfolio_df[PortfolioColumns.taxes.value].sum()
+        fees = portfolio_df[PortfolioColumns.fees.value].sum()
+        deposits += taxes + fees
+
+        returns_ts = compute_portfolio_returns_over_time(
+            order_df.loc[order_df[OrderColumns.portfolio.value] == key, :], book_currency
+        )
+        vol, max_dd, sharpe = compute_backtest_metrics(returns_ts)
+
+        value_book_currency = portfolio_df[PortfolioColumns.value_book_currency.value].sum()
+
+        fx_rate = 1
+        if book_currency != master_currency:
+            fx_rate = get_today_forex_rates(book_currency, master_currency)
+
+        row_dict = {
+            PortfolioSummary.open_date.value: open_date,
+            PortfolioSummary.account.value: key,
+            PortfolioSummary.deposits.value: deposits,
+            PortfolioSummary.value.value: value_book_currency,
+            PortfolioSummary.taxes.value: taxes,
+            PortfolioSummary.fees.value: fees,
+            PortfolioSummary.value_euro.value: value_book_currency * fx_rate,
+            PortfolioSummary.max_drawdown.value: max_dd,
+            PortfolioSummary.volatility.value: vol,
+            PortfolioSummary.sharpe.value: sharpe,
+        }
+        portfolio_summary_records.append(row_dict)
+
+    portfolio_summary = pd.DataFrame.from_records(portfolio_summary_records)
+
+    portfolio_summary[PortfolioSummary.returns.value] = (
+        portfolio_summary[PortfolioSummary.value.value] - portfolio_summary[PortfolioSummary.deposits.value]
+    ) / portfolio_summary[PortfolioSummary.deposits.value]
+    portfolio_summary[PortfolioSummary.yld.value] = (
+        portfolio_summary[PortfolioSummary.returns.value]
+        * 365
+        / (dt.date.today() - portfolio_summary[PortfolioSummary.open_date.value].dt.date).apply(lambda x: x.days)
+    )
+    return portfolio_summary
 
 
 def main():
@@ -236,6 +289,7 @@ def main():
     cash_accounts_summary = build_cash_accounts_summary(
         mvt_data, order_data, portfolios, book_currencies, master_currency
     )
+    portfolio_summary = build_portfolio_summary(order_data, portfolios, book_currencies, master_currency)
 
     print("done")
 

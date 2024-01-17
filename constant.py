@@ -14,6 +14,7 @@ class MovementType(Enum):
     interest = "Interet"
     fees = "Frais"
     taxes = "Taxes"
+    taxes_dvd = "Taxes dvd"
 
 
 class MovementColumns(Enum):
@@ -74,11 +75,28 @@ class YFinanceColumns(Enum):
 
 
 class CashAccountSummary(Enum):
+    open_date = "Date ouverture"
     account = "Compte"
     balance = "Balance"
     interest = "Interets"
     taxes = "Taxes"
     fees = "Frais"
+    pct = "Proportion Capital"
+    value_euro = "Valorisation Euro"
+
+
+class PortfolioSummary(Enum):
+    open_date = "Date ouverture"
+    account = "Compte"
+    deposits = "Investissements"
+    value = "Valorisation"
+    returns = "Rendement"
+    yld = "Yield"
+    fees = "Frais"
+    taxes = "Taxes"
+    sharpe = "Sharpe"
+    volatility = "Volatilite"
+    max_drawdown = "Max Drawdown"
     pct = "Proportion Capital"
     value_euro = "Valorisation Euro"
 
@@ -114,4 +132,21 @@ CASH_ACCOUNT_SUMMARY_DISPLAY_ORDER = [
     CashAccountSummary.taxes.value,
     CashAccountSummary.value_euro.value_euro,
     CashAccountSummary.pct.value_euro,
+]
+
+PORTFOLIO_SUMMARY_DISPLAY_ORDER = [
+    PortfolioSummary.open_date.value,
+    PortfolioSummary.account.value,
+    PortfolioSummary.deposits.value,
+    PortfolioSummary.returns.value,
+    PortfolioSummary.value.value,
+    PortfolioSummary.returns.value,
+    PortfolioSummary.yld.value,
+    PortfolioSummary.fees.value,
+    PortfolioSummary.taxes.value,
+    PortfolioSummary.sharpe.value,
+    PortfolioSummary.volatility.value,
+    PortfolioSummary.max_drawdown.value,
+    PortfolioSummary.pct.value,
+    PortfolioSummary.value_euro.value,
 ]

@@ -38,12 +38,23 @@ def get_company_info(stock_symbol, market_code):
 
 
 @lru_cache()
-def get_forex_rates(base_currency, target_currency):
+def get_today_forex_rates(base_currency: str, target_currency: str) -> pd.Series:
     today_str = dt.date.today().strftime("%Y-%m-%d")
     last_day_str = (dt.date.today() - dt.timedelta(days=5)).strftime("%Y-%m-%d")
     forex_pair = base_currency + target_currency + "=X"  # Append "=X" to the currency pair for Yahoo Finance
     forex_data = yf.download(forex_pair, start=last_day_str, end=today_str)
     return forex_data["Close"].iloc[-1]
+
+
+@lru_cache()
+def get_forex_rates_series(
+    base_currency: str, target_currency: str, start_date: dt.date, end_date: dt.date
+) -> pd.Series:
+    start_str = start_date.strftime("%Y-%m-%d")
+    end_str = end_date.strftime("%Y-%m-%d")
+    forex_pair = base_currency + target_currency + "=X"  # Append "=X" to the currency pair for Yahoo Finance
+    forex_data = yf.download(forex_pair, start=start_str, end=end_str)
+    return forex_data["Close"]
 
 
 @lru_cache()

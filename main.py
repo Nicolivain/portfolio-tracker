@@ -2,6 +2,7 @@ import datetime as dt
 from enum import Enum
 from typing import Dict, Type
 
+import matplotlib.pyplot as plt
 import pandas as pd
 import xlwings as xw
 
@@ -259,6 +260,18 @@ def build_portfolio_summary(
     return portfolio_summary
 
 
+def plot_portfolio_returns(portfolio_order_df, start_date, book_currency, title, sheet):
+    fig = plt.figure(figsize=(15, 7))
+    ax = fig.add_subplot(111)
+    portfolio_returns = compute_portfolio_returns_over_time(portfolio_order_df, book_currency)
+    cumulative_returns = (1 + portfolio_returns).cumprod().shift(1)
+    cumulative_returns.iloc[0] = 1
+    mask = pd.to_datetime(cumulative_returns.index) >= start_date
+    cumulative_returns[mask].plot(ax=ax)
+    ax.set_title(title)
+    sheet.pictures.add(fig, name=title, update=True)
+
+
 def main():
     wb = xw.Book.caller()
     mvt_sheet = wb.sheets["Mouvements"]
@@ -285,6 +298,15 @@ def main():
         portfolio_df = build_portfolio_analytics(portfolio_df, book_ccy)
         to_sheet = wb.sheets[portfolio_key]
         save_dataframe(portfolio_df[PORTFOLIO_DISPLAY_ORDER], origin, to_sheet, index=False)
+        plot_portfolio_returns(
+            portfolio_order_df=order_data[order_data[OrderColumns.portfolio.value] == portfolio_key],
+            start_date=order_data.loc[
+                order_data[OrderColumns.portfolio.value] == portfolio_key, OrderColumns.date.value
+            ].min(),
+            book_currency=book_ccy,
+            title="Portfolio performance since inception",
+            sheet=to_sheet,
+        )
 
     # Compute the overall investment resume
     cash_accounts_summary = build_cash_accounts_summary(
@@ -293,6 +315,15 @@ def main():
     save_dataframe(cash_accounts_summary, "B2", summary_sheet, index=False)
     portfolio_summary = build_portfolio_summary(order_data, portfolios, book_currencies, master_currency)
     save_dataframe(portfolio_summary, "B10", summary_sheet, index=False)
+
+    plot_portfolio_returns(
+        portfolio_order_df=order_data,
+        start_date=order_data[OrderColumns.date.value].min(),
+        book_currency=master_currency,
+        title="Portfolio performance since inception",
+        sheet=summary_sheet,
+    )
+
     print("done")
 
 

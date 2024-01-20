@@ -56,7 +56,7 @@ class PortfolioColumns(Enum):
     taxes = "Taxes"
 
     value_local_currency = "Valorisation"
-    value_book_currency = "Valoristation Portefeuille"
+    value_book_currency = "Valorisation Portefeuille"
     delta = "Delta"
     dividends = "Dividendes Percus"
 

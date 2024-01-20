@@ -302,7 +302,7 @@ def main():
     master_currency = "EUR"
     book_currencies = {"BARC": "GBP"}
 
-    origin = "A2"
+    origin = "B2"
 
     mvt_data = read_table(origin, mvt_sheet).reset_index()
     mvt_data.drop(MovementColumns.desc.value, inplace=True, axis=1)

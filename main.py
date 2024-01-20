@@ -328,6 +328,13 @@ def main():
             title="Portfolio performance since inception",
             sheet=to_sheet,
         )
+        plot_portfolio_returns(
+            portfolio_order_df=order_data[order_data[OrderColumns.portfolio.value] == portfolio_key],
+            start_date=pd.to_datetime(dt.date.today() - dt.timedelta(days=365)),
+            book_currency=book_ccy,
+            title="Portfolio 1Y",
+            sheet=to_sheet,
+        )
         plot_donut_chart(
             labels=portfolio_df[PortfolioColumns.sym.value],
             sizes=portfolio_df[PortfolioColumns.value_book_currency.value],
@@ -339,10 +346,17 @@ def main():
     cash_accounts_summary = build_cash_accounts_summary(
         mvt_data, order_data, portfolios, book_currencies, master_currency
     )
-    save_dataframe(cash_accounts_summary, "B2", summary_sheet, index=False)
+    save_dataframe(cash_accounts_summary, "B8", summary_sheet, index=False)
     portfolio_summary = build_portfolio_summary(order_data, portfolios, book_currencies, master_currency)
-    save_dataframe(portfolio_summary, "B10", summary_sheet, index=False)
+    save_dataframe(portfolio_summary, "B20", summary_sheet, index=False)
 
+    plot_portfolio_returns(
+        portfolio_order_df=order_data,
+        start_date=pd.to_datetime(dt.date.today() - dt.timedelta(days=365)),
+        book_currency=master_currency,
+        title="Portfolio performance 1Y",
+        sheet=summary_sheet,
+    )
     plot_portfolio_returns(
         portfolio_order_df=order_data,
         start_date=order_data[OrderColumns.date.value].min(),

@@ -1,5 +1,19 @@
 from enum import Enum
 
+### Budgetting Constants ###
+
+class BudgettingColumns(Enum):
+    date = "dateOp"
+    category = "categoryParent"
+    subcategory = "category"
+    amount = "amount"
+    description = "label"
+    account = "accountNum"
+    bank = "accountLabel"
+    receiver = "supplierFound"
+    tags = "Tags"
+    notes = "comment"
+    
 
 class Side(Enum):
     buy = "Achat"

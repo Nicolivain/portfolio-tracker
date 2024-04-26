@@ -8,6 +8,7 @@ import pandas as pd
 import xlwings as xw
 
 from constant import (
+    BudgettingColumns,
     OrderColumns,
     MovementColumns,
     MovementType,
@@ -18,6 +19,16 @@ from constant import (
     Side,
     SIDE_TO_IBUY,
     PORTFOLIO_DISPLAY_ORDER,
+)
+from budget_utils import ( 
+    preprocess_budget_data,
+    get_income,
+    get_expenses,
+    plot_income_category,
+    plot_expenses_category,
+    plot_evolving_balance,
+    plot_sankey,
+    update_budget
 )
 from portfolio_utils import (
     compute_sharpe_ratio,
@@ -292,12 +303,16 @@ def plot_donut_chart(labels, sizes, title, sheet):
     ax.set_title(title)
     sheet.pictures.add(fig, name=title, update=True)
 
+def plot_sankey_diagram(budget_history_df, sheet):
+    pass
+
 
 def main():
     wb = xw.Book.caller()
     mvt_sheet = wb.sheets["Mouvements"]
     order_sheet = wb.sheets["Ordres"]
     summary_sheet = wb.sheets["Investissement"]
+    budget_sheet = wb.sheets["Budget"]
 
     master_currency = "EUR"
     book_currencies = {"BARC": "GBP"}
@@ -373,6 +388,51 @@ def main():
         sheet=summary_sheet,
     )
 
+    # Budget sheet
+    budget_sheet.range("A1").value = "To import a bank account history, either paste your history starting from B2 cell and specify headers in constant.py, or go to Developer > Insert > Button, and link the button to the import_csv() function in budget_utils.py "
+    budget_history_df = read_table("B2", budget_sheet, index=0, header=1).reset_index()
+    if not budget_history_df.empty:
+        budget_history_df = preprocess_budget_data(budget_history_df)
+        update_budget()
+
+        # Add the dropdown menu to cell O2
+        cell = budget_sheet.range('O2').api
+        options = "All time, Last 30 days, Last 90 days, Last 180 days, Last 365 days, Year to date"
+        cell.Validation.Delete()
+        cell.Validation.Add(Type=3, AlertStyle=2, Operator=1, Formula1=options)
+        cell.Validation.IgnoreBlank = True
+        cell.Validation.InCellDropdown = True
+        
+        income = get_income(budget_history_df)
+        expenses = get_expenses(budget_history_df)
+
+        plot_income_category(
+            income,
+            budget_sheet
+        )
+        plot_income_category(
+            income,
+            budget_sheet,
+            subcategory=True
+        )
+        plot_expenses_category(
+            expenses,
+            budget_sheet
+        )
+        plot_expenses_category(
+            expenses,
+            budget_sheet,
+            subcategory=True
+        )
+        # plot_evolving_balance(
+        #     budget_history_df,
+        #     budget_sheet
+        # )
+        # plot_sankey(
+        #     budget_history_df,
+        #     budget_sheet
+        # )
+    
     print("done")
 
 

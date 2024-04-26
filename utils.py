@@ -65,3 +65,4 @@ def get_historical_prices_with_dates(
     ticker = yf.Ticker(tkr)
     historical_data = ticker.history(start=start_date, end=end_date)
     return historical_data
+

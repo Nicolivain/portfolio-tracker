@@ -115,7 +115,7 @@ class PortfolioSummary(Enum):
     value_euro = "Valorisation Euro"
 
 
-MARKET_MAP = {"XLON": "L", "XSTO": "ST"}
+MARKET_MAP = {"XLON": "L", "XSTO": "ST", "XPAR": "PA"}
 
 SIDE_TO_IBUY = {Side.buy: 1, Side.sell: -1, Side.deposit: 1, Side.withdrawal: -1}
 

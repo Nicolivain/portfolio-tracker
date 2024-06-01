@@ -41,9 +41,9 @@ matplotlib.use("Agg")
 
 def main(book_currencies: Dict[str, str], reporting_currency: str = "EUR"):
     wb = xw.Book.caller()
-    mvt_sheet = wb.sheets["Mouvements"]
-    order_sheet = wb.sheets["Ordres"]
-    summary_sheet = wb.sheets["Investissement"]
+    mvt_sheet = wb.sheets["Movements"]
+    order_sheet = wb.sheets["Orders"]
+    summary_sheet = wb.sheets["Summary"]
     budget_sheet = wb.sheets["Budget"]
 
     origin = "B2"

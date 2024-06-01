@@ -1,6 +1,5 @@
 from enum import Enum
 
-### Budgetting Constants ###
 
 class BudgettingColumns(Enum):
     date = "dateOp"

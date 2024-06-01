@@ -3,6 +3,8 @@ import matplotlib
 import pandas as pd
 import xlwings as xw
 
+from typing import Dict
+
 from portfolio_tracker.constant import (
     OrderColumns,
     MovementColumns,
@@ -37,15 +39,12 @@ from portfolio_tracker.plot import plot_donut_chart, plot_portfolio_returns
 matplotlib.use("Agg")
 
 
-def main():
+def main(book_currencies: Dict[str, str], reporting_currency: str = "EUR"):
     wb = xw.Book.caller()
     mvt_sheet = wb.sheets["Mouvements"]
     order_sheet = wb.sheets["Ordres"]
     summary_sheet = wb.sheets["Investissement"]
     budget_sheet = wb.sheets["Budget"]
-
-    master_currency = "EUR"
-    book_currencies = {"BARC": "GBP"}
 
     origin = "B2"
 
@@ -60,7 +59,7 @@ def main():
     # Generate each portfolio's individual page
     portfolios = aggregate_orders_to_portfolio_df(order_data)
     for portfolio_key, portfolio_df in portfolios.items():
-        book_ccy = book_currencies.get(portfolio_key, master_currency)
+        book_ccy = book_currencies.get(portfolio_key, reporting_currency)
         portfolio_df = build_portfolio_analytics(portfolio_df, book_ccy)
         to_sheet = wb.sheets[portfolio_key]
         save_dataframe(portfolio_df[PORTFOLIO_DISPLAY_ORDER], origin, to_sheet, index=False)
@@ -89,23 +88,23 @@ def main():
 
     # Compute the overall investment resume
     cash_accounts_summary = build_cash_accounts_summary(
-        mvt_data, order_data, portfolios, book_currencies, master_currency
+        mvt_data, order_data, portfolios, book_currencies, reporting_currency
     )
     save_dataframe(cash_accounts_summary, "B8", summary_sheet, index=False)
-    portfolio_summary = build_portfolio_summary(order_data, portfolios, book_currencies, master_currency)
+    portfolio_summary = build_portfolio_summary(order_data, portfolios, book_currencies, reporting_currency)
     save_dataframe(portfolio_summary, "B20", summary_sheet, index=False)
 
     plot_portfolio_returns(
         portfolio_order_df=order_data,
         start_date=pd.to_datetime(dt.date.today() - dt.timedelta(days=365)),
-        book_currency=master_currency,
+        book_currency=reporting_currency,
         title="Portfolio performance 1Y",
         sheet=summary_sheet,
     )
     plot_portfolio_returns(
         portfolio_order_df=order_data,
         start_date=order_data[OrderColumns.date.value].min(),
-        book_currency=master_currency,
+        book_currency=reporting_currency,
         title="Portfolio performance since inception",
         sheet=summary_sheet,
     )

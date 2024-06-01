@@ -1,7 +1,7 @@
 # Portfolio Tracker
-A python-augmented excel spreadsheet to track portfolio performance.  
-Supports multiple books with multiple currencies.  
-The framework is easily extendable to add extra plots or reports.
+A python-augmented excel spreadsheet to track portfolio performance.  Supports multiple books with multiple currencies. 
+
+The framework is easily extendable to add extra plots or reports, contributions welcome!
 
 ## Visuals
 

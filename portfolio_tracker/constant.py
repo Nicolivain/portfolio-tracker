@@ -1,6 +1,5 @@
 from enum import Enum
 
-### Budgetting Constants ###
 
 class BudgettingColumns(Enum):
     date = "dateOp"
@@ -16,69 +15,69 @@ class BudgettingColumns(Enum):
     
 
 class Side(Enum):
-    buy = "Achat"
-    sell = "Vente"
-    deposit = "Depot"
-    withdrawal = "Retrait"
+    buy = "Buy"
+    sell = "Sell"
+    deposit = "Deposit"
+    withdrawal = "Withdrawal"
 
 
 class MovementType(Enum):
-    deposit = "Depot"
-    withdrawal = "Retrait"
-    interest = "Interet"
-    fees = "Frais"
+    deposit = "Deposit"
+    withdrawal = "Withdrawal"
+    interest = "Interest"
+    fees = "Fees"
     taxes = "Taxes"
     taxes_dvd = "Taxes dvd"
 
 
 class MovementColumns(Enum):
     date = "Date"
-    account = "Compte"
-    side = "Depot/Retrait"
-    qty = "Montant"
+    account = "Account"
+    side = "D/W"
+    qty = "Amount"
     desc = "Description"
     type = "Type"
-    currency = "Devise"
+    currency = "Currency"
 
 
 class OrderColumns(Enum):
     position_open_date = "_position_open_date"
     date = "Date"
-    portfolio = "Portefeuille"
+    portfolio = "Portfolio"
     instrument = "Instrument"
-    market = "Marche"
-    sym = "Symbole"
-    side = "Achat/Vente"
-    qty = "Unites"
-    unit_cost = "PRU"
+    market = "Market"
+    sym = "Symbol"
+    side = "Side"
+    qty = "Quantity"
+    unit_cost = "Unit Cost"
     book_cost = "Book Cost"
-    fees = "Frais"
+    fees = "Fees"
     taxes = "Taxes"
-    total_cost = "Cout Total"
+    total_cost = "Total Cost"
 
 
 class PortfolioColumns(Enum):
     date = "Date"
-    local_ccy = "Devise"
+    local_ccy = "Currency"
     instrument = "Instrument"
-    market = "Marche"
-    sym = "Symbole"
-    qty = "Unites"
-    price = "Prix"
-    unit_cost = "PRU"
-    fees = "Frais"
+    market = "Market"
+    sym = "Symbol"
+    qty = "Quantity"
+    price = "Current Price"
+    unit_cost = "Unit Cost"
+    fees = "Fees"
     taxes = "Taxes"
 
-    value_local_currency = "Valorisation"
-    value_book_currency = "Valorisation Portefeuille"
+    value_local_currency = "Valorisation Local Ccy"
+    value_book_currency = "Valorisation Reporting Ccy"
     delta = "Delta"
-    dividends = "Dividendes Percus"
+    dividends = "Dividends"
 
-    returns = "Rendement"
-    yld = "Yield"
+    returns = "Returns"
+    yld = "Ann. Returns"
     sharpe = "Sharpe ratio"
 
-    gross_profits = "ROI Brut"
+    gross_profits = "ROI Gross"
     net_profits = "ROI Net"
 
 
@@ -90,29 +89,29 @@ class YFinanceColumns(Enum):
 
 class CashAccountSummary(Enum):
     open_date = "Date ouverture"
-    account = "Compte"
+    account = "Account"
     balance = "Balance"
-    interest = "Interets"
+    interest = "Interests"
     taxes = "Taxes"
-    fees = "Frais"
-    pct = "Proportion Capital"
-    value_euro = "Valorisation Euro"
+    fees = "Taxes"
+    pct = "Capital Allocation"
+    value_euro = "Valorisation Reporting Ccy"
 
 
 class PortfolioSummary(Enum):
-    open_date = "Date ouverture"
-    account = "Compte"
-    deposits = "Investissements"
+    open_date = "Opening Data"
+    account = "Account"
+    deposits = "Investments"
     value = "Valorisation"
-    returns = "Rendement"
-    yld = "Yield"
-    fees = "Frais"
+    returns = "Returns"
+    yld = "Ann. Returns"
+    fees = "Fees"
     taxes = "Taxes"
     sharpe = "Sharpe"
     volatility = "Volatilite"
     max_drawdown = "Max Drawdown"
-    pct = "Proportion Capital"
-    value_euro = "Valorisation Euro"
+    pct = "Capital Allocation"
+    value_euro = "Valorisation Reporting Ccy"
 
 
 MARKET_MAP = {"XLON": "L", "XSTO": "ST", "XPAR": "PA"}
